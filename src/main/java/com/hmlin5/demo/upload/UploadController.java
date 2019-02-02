@@ -32,10 +32,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UploadController  {
 
 	
-	@Value("${web.upload-path}")
+	//@Value("${web.upload-path}")
     public  String MULTIMEDIA_PATH; 
 	
-	@Value("${web.resource-url}")
+	//@Value("${web.resource-url}")
 	public  String RESOURECE_URL;
 	
 	

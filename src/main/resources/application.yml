@@ -51,7 +51,7 @@ spring:
          static-locations: /META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${web.upload-path}
 
 
-web:
-    upload-path: D:/upload/
-    resource-url: http://127.0.0.1:8080/
+#web:
+#    upload-path: D:/upload/
+#    resource-url: http://127.0.0.1:8080/
 
