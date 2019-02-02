@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hmlin5.demo.sample.dao.SfaProductIntegralConfigMapper">
+  <resultMap id="BaseResultMap" type="com.hmlin5.demo.sample.model.SfaProductIntegralConfig">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="product_id" jdbcType="INTEGER" property="productId" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="lower_limit" jdbcType="DOUBLE" property="lowerLimit" />
+    <result column="upper_limit" jdbcType="DOUBLE" property="upperLimit" />
+    <result column="top_leader_integral" jdbcType="DOUBLE" property="topLeaderIntegral" />
+    <result column="top_leader_unit" jdbcType="VARCHAR" property="topLeaderUnit" />
+    <result column="manager_integral" jdbcType="DOUBLE" property="managerIntegral" />
+    <result column="manager_unit" jdbcType="VARCHAR" property="managerUnit" />
+    <result column="director_integral" jdbcType="DOUBLE" property="directorIntegral" />
+    <result column="director_unit" jdbcType="VARCHAR" property="directorUnit" />
+    <result column="group_leader_integral" jdbcType="DOUBLE" property="groupLeaderIntegral" />
+    <result column="group_leader_unit" jdbcType="VARCHAR" property="groupLeaderUnit" />
+    <result column="member_integral" jdbcType="DOUBLE" property="memberIntegral" />
+    <result column="member_unit" jdbcType="VARCHAR" property="memberUnit" />
+    <result column="start_date" jdbcType="DATE" property="startDate" />
+    <result column="end_date" jdbcType="DATE" property="endDate" />
+    <result column="changed_code" jdbcType="INTEGER" property="changedCode" />
+    <result column="changed_name" jdbcType="VARCHAR" property="changedName" />
+    <result column="changed_time" jdbcType="TIMESTAMP" property="changedTime" />
+    <result column="del_flag" jdbcType="TINYINT" property="delFlag" />
+  </resultMap>
+
+
+
+
+
+  <sql id="sfaProductIntegralConfigColumns">
+		a.id AS "id",
+		a.product_id AS "productId",
+		a.product_name AS "productName",
+		a.lower_limit AS "lowerLimit",
+		a.upper_limit AS "upperLimit",
+		a.top_leader_integral AS "topLeaderIntegral",
+		a.top_leader_unit AS "topLeaderUnit",
+		a.manager_integral AS "managerIntegral",
+		a.manager_unit AS "managerUnit",
+		a.director_integral AS "directorIntegral",
+		a.director_unit AS "directorUnit",
+		a.group_leader_integral AS "groupLeaderIntegral",
+		a.group_leader_unit AS "groupLeaderUnit",
+		a.member_integral AS "memberIntegral",
+		a.member_unit AS "memberUnit",
+		a.start_date AS "startDate",
+		a.end_date AS "endDate",
+		a.changed_code AS "changedCode",
+		a.changed_name AS "changedName",
+		a.changed_time AS "changedTime",
+		a.del_flag AS "delFlag"
+	</sql>
+
+
+  <select id="findList"   parameterType="com.hmlin5.demo.sample.model.SfaProductIntegralConfig" resultMap="BaseResultMap">
+    SELECT
+    <!--<include refid="sfaProductIntegralConfigColumns"/>-->
+      *
+    FROM sfa_product_integral_config a
+    <where>
+      a.del_flag = 0
+        <if test="id != null and id != ''">
+            AND a.id != #{id}
+        </if>
+      <if test="productId != null and productId != ''">
+        AND a.product_id = #{productId}
+      </if>
+      <if test="productName != null and productName != ''">
+        AND a.product_name LIKE concat('%',#{productName},'%')
+      </if>
+
+    </where>
+      ORDER BY a.changed_time DESC
+  </select>
+
+
+    <insert id="insertList" parameterType="com.hmlin5.demo.hrWagesDetail.model.BaseQueryBean" >
+
+        INSERT INTO hr_wages_detail(
+        `id`,
+        `pay_date`,
+        `emp_id`,
+        `emp_name`,
+        `base_wages`,
+        `float_wages`,
+        `other_wages`,
+        `total_pay_amount`,
+        `social_security_fee`,
+        `accumulation_fund`,
+        `personal_income_tax`,
+        `water_charge`,
+        `electric_charge`,
+        `other_total_charge`,
+        `monthly_arears`,
+        `this_month_arears`,
+        `final_pay_amount`,
+        `remarks`,
+        `changed_code`,
+        `changed_name`,
+        `changed_time`
+        ) VALUES
+        <foreach collection ="importList" item="wd" separator =",">
+            (
+            #{wd.id},
+            #{wd.payDate},
+            #{wd.empId},
+            #{wd.empName},
+            #{wd.baseWages},
+            #{wd.floatWages},
+            #{wd.otherWages},
+            #{wd.totalPayAmount},
+            #{wd.socialSecurityFee},
+            #{wd.accumulationFund},
+            #{wd.personalIncomeTax},
+            #{wd.waterCharge},
+            #{wd.electricCharge},
+            #{wd.otherTotalCharge},
+            #{wd.monthlyArears},
+            #{wd.thisMonthArears},
+            #{wd.finalPayAmount},
+            #{wd.remarks},
+            #{wd.changedCode},
+            #{wd.changedName},
+            #{wd.changedTime}
+            )
+        </foreach >
+        on duplicate key update
+        emp_name = values(emp_name),
+        base_wages = values(base_wages),
+        float_wages = values(float_wages),
+        other_wages = values(other_wages),
+        total_pay_amount = values(total_pay_amount),
+        social_security_fee = values(social_security_fee),
+        accumulation_fund = values(accumulation_fund),
+        personal_income_tax = values(personal_income_tax),
+        water_charge = values(water_charge),
+        electric_charge = values(electric_charge),
+        other_total_charge = values(other_total_charge),
+        monthly_arears = values(monthly_arears),
+        this_month_arears = values(this_month_arears),
+        final_pay_amount = values(final_pay_amount),
+        remarks = values(remarks),
+        changed_code = values(changed_code),
+        changed_name = values(changed_name),
+        changed_time = values(changed_time)
+    </insert>
+
+
+
+</mapper>

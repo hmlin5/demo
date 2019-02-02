@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue Demo</title>
+
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 2.5s;
+        }
+        .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+            opacity: 0;
+        }
+    </style>
+
+    <script src="/vue/vue.min.js"></script>
+</head>
+<body>
+<div >
+    <div  id="app" v-cloak>
+
+        <button v-on:click="show">点点看</button>
+        <transition name="fade" >
+            <h1 v-if="seen">你大爷</h1>
+        </transition>
+        <hr>
+        <alert-box>404</alert-box>
+        <hr>
+        <div :style="{fontSize:postFondsize+'em'}">
+            <component-post-demo  v-for="post in posts" v-on:enlarge-text="enLargePostText" v-bind:post="post"></component-post-demo>
+        </div>
+        <hr>
+       <!-- <component-post-demo post="{id:'1',title='111'}"></component-post-demo>-->
+
+        <hr>
+        <component-demo></component-demo>
+        <component-demo></component-demo>
+
+        <hr>
+        <div id="example1">
+            <select v-model="choise1" >
+                <option value="">请选择</option>
+             <option v-for="p in products" :value="p.id">
+                 {{p.name}}
+             </option>
+
+            </select>
+            <span>选择是: {{choise1}}</span>
+        </div>
+
+        <hr>
+        <div id="example">
+            <select v-model="choise" >
+                <option value="">请选择</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+
+            </select>
+            <span>选择是: {{choise}}</span>
+        </div>
+
+        <hr>
+        <button @click="testArray">测试数组按钮</button>
+        <hr>
+        <template v-if="loginType === 'username'">
+            <label>用户名</label>
+            <input placeholder="请输入用户名" key="username-input"/>
+        </template>
+        <template v-if="loginType === 'email'">
+            <label>邮箱</label>
+            <input placeholder="请输入邮箱" key="email-input"/>
+        </template>
+        <p>  <button @click="toggleLogin">更改登录方式</button></p>
+        <hr>
+        <form>
+           id: <input id="id" v-model="pid" />
+          名称:  <input id="pname" v-model="pname" />
+          价格:  <input id="pprice" v-model="pprice" />
+            <button id="submit" type="button" @click="addProduct" >添加</button>
+            <p>你输入的信息是: id={{pid}}, 名称是{{pname}}</p>
+        </form>
+        <table width="30%" border="1">
+            <tr>
+                <th>编号</th>
+                <th>名称</th>
+                <th>价格</th>
+                <th>日期</th>
+                <th>操作</th>
+            </tr>
+            <tr v-if="products.length == 0"> <td colspan="5">暂无数据</td></tr>
+            <tr v-for="(product,index) in products">
+                <td v-show="false">{{product.id}}</td>
+                <td>{{index+1}}</td>
+                <td>{{product.name}}</td>
+                <td>{{product.price + unit}}/斤</td>
+                <td>{{dateFormat(product.time)}}</td>
+                <td><a v-bind:href="product.url">删除</a></td>
+            </tr>
+
+        </table>
+
+        <h1 v-text="name"></h1>
+        <h1>{{reversedName}}</h1>
+        <h1>现在是:  {{ currentTime }}</h1>
+    <hr>
+    <h2 v-bind:title="title1">双向绑定...</h2>
+    <h2 :title="title1">双向绑定简写...</h2>
+
+        <hr>
+        <input type="button" value="只能点击一次" @click.once="show"/>
+        <input type="button" value="点击多次" v-on:click="show"/>
+        <input type="button" value="键盘回车监听" v-on:keyup.13="show"/>
+        <hr>
+        <table width="30%" border="1">
+            <tr>
+                <th>序列</th>
+                <th>商品编号</th>
+                <th>商品名称</th>
+                <th>价格</th>
+            </tr>
+            <tr v-for="(product,index) in products">
+                <td>{{index+1}}</td>
+                <td>{{product.id}}</td>
+                <td>{{product.name}}</td>
+                <td>{{product.price + unit}}</td>
+            </tr>
+        </table>
+
+        <hr>
+        <p v-if="seen">现在你看到我了</p>
+    </div>
+</div>
+</body>
+
+<script>
+
+    //需要在实例化初始化vue之前注册组件
+    Vue.component("component-demo",{
+        data:function(){
+            return{
+                count:0
+            }
+        },
+        template:'<div><button v-on:click="count++">我被点{{count}}次了</button></div>'
+    })
+
+    Vue.component("component-post-demo",{
+        props:['post'],
+        data:function(){
+            return{
+                count:0
+            }
+        },
+        template:'<div ><h1  v-on:click="count++">{{post.id}}-{{post.title}}(点击数:{{count}})</h1><button v-on:click="$emit(\'enlarge-text\',0.1)">博文字体增大</button></div>'
+    })
+
+    Vue.component("alert-box",{
+        template: '<div><strong>Error!</strong><slot></slot></div>'
+    })
+
+    var vm =  new Vue({
+        el:"#app",
+        data:{
+            choise1:1,
+            choise:"",
+            loginType:'username',
+            name:'Hello Vue!!!',
+            title1:"666",
+            unit:"元",
+            products:[
+                {
+                    id:1,
+                    name:"苹果",
+                    price:"100",
+                    time:"2018-10-3 18:30:00",
+                    url:"#"
+                },
+                {
+                    id:2,
+                    name:"香蕉",
+                    price:"250",
+                    time:"2018-9-30 14:20:25",
+                    url:"#"
+                },
+            ],
+            items:["苹果","香蕉","西瓜"],
+            seen:false,
+            pid:0,
+            pname:"",
+            pprice:0,
+            posts: [
+                { id: 1, title: 'My journey with Vue' },
+                { id: 2, title: 'Blogging with Vue' },
+                { id: 3, title: 'Why Vue is so fun' }
+            ],
+            postFondsize:1,
+        },
+        methods:{
+            testArray:function(){
+                this.items.push("苹果+","香蕉+");
+                alert(this.items);
+            },
+            toggleLogin:function () {
+                this.loginType = this.loginType === "username"? "email" : "username";
+            },
+            show:function (event) {
+                this.seen = !this.seen;
+            },
+            now:function(){
+                return Date.now();
+            },
+            dateFormat:function(time) {
+                var date=new Date(time);
+                var year=date.getFullYear();
+                /* 在日期格式中，月份是从0开始的，因此要加0
+                 * 使用三元表达式在小于10的前面加0，以达到格式统一  如 09:11:05
+                 * */
+                var month= date.getMonth()+1<10 ? "0"+(date.getMonth()+1) : date.getMonth()+1;
+                var day=date.getDate()<10 ? "0"+date.getDate() : date.getDate();
+                var hours=date.getHours()<10 ? "0"+date.getHours() : date.getHours();
+                var minutes=date.getMinutes()<10 ? "0"+date.getMinutes() : date.getMinutes();
+                var seconds=date.getSeconds()<10 ? "0"+date.getSeconds() : date.getSeconds();
+                // 拼接
+                return year+"-"+month+"-"+day+" "+hours+":"+minutes+":"+seconds;
+            },
+            addProduct:function (event){
+              newProduct =  {
+                    id:this.pid,
+                    name:this.pname,
+                    price:this.pprice,
+                    time:new Date(),
+                    url:"#"
+                };
+             this.products.push(newProduct);
+             this.pid = 0;
+             this.pname = "";
+             this.pprice = 0;
+
+            },
+            enLargePostText:function (enlargeAmount) {
+                this.postFondsize += 0.1;
+            }
+        },
+        computed:{
+            // 计算属性的 getter
+            reversedName:function(){
+                // `this` 指向 vm 实例
+                return this.name.split('').reverse().join('');
+            },
+            currentTime: function () {
+                return Date.now();
+            }
+        }
+
+
+
+    })
+
+
+
+</script>
+
+
+
+</html>

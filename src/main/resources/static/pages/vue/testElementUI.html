@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ElementUI测试</title>
+
+    <script src="/vue/vue.min.js"></script>
+    <script src="/vue/elementui.js"></script>
+    <link rel="stylesheet" href="/vue/elementui.css">
+
+
+    <style>
+        .avatar-uploader .el-upload {
+            border: 1px dashed #d9d9d9;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .avatar-uploader .el-upload:hover {
+            border-color: #409EFF;
+        }
+        .avatar-uploader-icon {
+            font-size: 28px;
+            color: #8c939d;
+            width: 178px;
+            height: 178px;
+            line-height: 178px;
+            text-align: center;
+        }
+        .avatar {
+            width: 178px;
+            height: 178px;
+            display: block;
+        }
+    </style>
+
+</head>
+<body>
+
+<div id="app">
+
+
+
+    <el-upload
+            action="/file/upload"
+            list-type="picture-card"
+            limit=2
+            :data="uploadParam"
+            :on-preview="handlePictureCardPreview"
+            :on-success="handleAvatarSuccess"
+            :on-exceed="handleExceed"
+            :on-change="fileChange"
+            :on-remove="handleRemove">
+        <i class="el-icon-plus"></i>
+    </el-upload>
+    <el-dialog :visible.sync="dialogVisible">
+        <img width="100%" :src="dialogImageUrl" alt="">
+    </el-dialog>
+
+    <hr>
+
+   <!-- <el-upload
+            class="avatar-uploader"
+            action="/file/upload"
+            :show-file-list="true"
+            :on-success="handleAvatarSuccess"
+            :before-upload="beforeAvatarUpload">
+        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+    </el-upload>-->
+
+
+
+    <hr>
+
+    <el-row>
+    <el-button @click="visible = true">点点看</el-button>
+    <el-button @click="visible = true" type="success" plain>点点看</el-button>
+    <el-button @click="visible = true"  icon="el-icon-search" circle></el-button>
+    <el-button @click="visible = true" type="danger" icon="el-icon-delete" round disabled>禁止点击</el-button>
+    <el-button  type="primary" plain>上传<i class="el-icon-upload el-icon--right"></i></el-button>
+    </el-row>
+
+    <el-dialog :visible.sync="visible" title="真香警告">
+        <H1>点击成功</H1>
+    </el-dialog>
+
+    <hr>
+
+
+    <el-row>
+        <el-button-group>
+            <el-button type="primary" icon="el-icon-edit"></el-button>
+            <el-button type="primary" icon="el-icon-share"></el-button>
+            <el-button type="primary" icon="el-icon-delete"></el-button>
+        </el-button-group>
+
+    </el-row>
+
+    <hr>
+
+    <el-row>
+        <el-button type="primary" :loading="false">加载中</el-button>
+        <el-button type="primary" :loading="true">加载中</el-button>
+    </el-row>
+
+    <hr>
+    <template>
+        <el-radio v-model="radio" label="1">男</el-radio>
+        <el-radio v-model="radio" label="2">女</el-radio>
+    </template>
+    <hr>
+
+    <template>
+        <el-radio-group v-model="radio2">
+            <el-radio :label="3">备选项1</el-radio>
+            <el-radio :label="6">备选项2</el-radio>
+            <el-radio :label="9">备选项3</el-radio>
+        </el-radio-group>
+    </template>
+<hr>
+
+    <template>
+        <el-checkbox-group v-model="checkList">
+            <el-checkbox label="复选框 A"></el-checkbox>
+            <el-checkbox label="复选框 B"></el-checkbox>
+            <el-checkbox label="复选框 C"></el-checkbox>
+            <el-checkbox label="禁用" disabled></el-checkbox>
+            <el-checkbox label="选中且禁用" disabled></el-checkbox>
+        </el-checkbox-group>
+    </template>
+
+    <hr>
+    <template>
+        <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+        <div style="margin: 15px 0;"></div>
+        <el-checkbox-group v-model="checkedCities" @change="handleCheckedCitiesChange">
+            <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
+        </el-checkbox-group>
+    </template>
+
+</div>
+
+</body>
+
+<script>
+   var cityOptions = ['上海', '北京', '广州', '深圳'];
+
+    new Vue({
+        el: '#app',
+        data: {
+            visible:false,
+            radio:'2',
+            radio2:3,
+            checkList:["复选框 A","复选框 C"],
+            checkAll: false,
+            checkedCities: ['上海', '北京'],
+            cities: cityOptions,
+            isIndeterminate: true,
+            imageUrl: '',
+            dialogImageUrl: '',
+            uploadParam:{"uploadParam":"haha"},
+            dialogVisible:false
+        },
+        methods: {
+            handleCheckAllChange(val) {
+                this.checkedCities = val ? cityOptions : [];
+               this.isIndeterminate = false;
+            },
+            handleCheckedCitiesChange(value) {
+                var checkedCount = value.length;
+                this.checkAll = checkedCount === this.cities.length;
+                this.isIndeterminate = checkedCount > 0 && checkedCount < this.cities.length;
+            },
+          /*  文件上传方法*/
+            //上传成功
+            handleAvatarSuccess(res, file) {
+               // this.imageUrl = URL.createObjectURL(file.raw);
+                if (res.code == 1){
+                    //this.imageUrl = res.data;
+                    console.log(file);
+                }else{
+                    this.$message.error(res.msg);
+                }
+            },
+            handleExceed(files, fileList){
+                this.$message.error('最多只能上传2张图片!');
+
+            },
+            //上传前校验
+            beforeAvatarUpload(file) {
+                var isJPG = file.type === 'image/jpeg';
+                var isLt2M = file.size / 1024 / 1024 < 2;
+
+                if (!isJPG) {
+                    this.$message.error('上传头像图片只能是 JPG 格式!');
+                }
+                if (!isLt2M) {
+                    this.$message.error('上传头像图片大小不能超过 2MB!');
+                }
+                return isJPG && isLt2M;
+            },
+            //文件改变,添加文件、上传成功和上传失败时都会被调用
+            fileChange(file,fileList) {
+              //  console.log(fileList);
+                var temp_str = '';
+                // if(fileList.length > 0){
+                //     for(var i=0; i<fileList.length; i++){
+                //         if(fileList[i].response){
+                //             if(fileList[i].response.code === 0){
+                //                 if(i===0){
+                //                     temp_str += fileList[i].response.data;
+                //                 } else {
+                //                     // 最终photo的格式是所有已上传的图片的url拼接的字符串（逗号隔开）
+                //                     temp_str += ',' + fileList[i].response.data;
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
+                // this.addForm.photo = temp_str;
+            },
+            //删除
+            handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            //预览
+            handlePictureCardPreview(file) {
+                this.dialogImageUrl = file.url;
+                this.dialogVisible = true;
+            }
+        }
+    })
+</script>
+
+</html>

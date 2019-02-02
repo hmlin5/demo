@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>员工自助服务后台管理(一线)</title>
+</head>
+<!-- 引入样式 -->
+<script src="/vue/vue.min.js"></script>
+<script src="/vue/elementui.js"></script>
+<link rel="stylesheet" href="/vue/elementui.css">
+<style type="text/css">
+  /* CSS Document */
+  *{margin:0px auto;pdding:0px;}
+  * .el-message__icon{
+	  margin:0px;
+	  margin-right:5px;
+  }
+  body{
+    margin:0px auto;
+    padding:0px;
+    width:96%;
+    height:100%;
+}
+  h4{line-height:35px;}
+
+  .comment_quote{
+	  line-height:150%;
+	  font-family:PingFangSC-Regular, PingFang SC;
+	  font-size: 12px;
+	  padding: 5px 10px 5px 15px;
+	  margin-bottom:15px;
+  }
+  span.title{
+	  display:block;
+	  height:15px;
+	  position:relative;
+	  top:-10px;
+	  margin-left: 2%;
+	  color: #0000FF;
+	  font-size: 12px;
+	  background: white;
+  }
+
+</style>
+<style>
+	[v-cloak]{
+		display: none;
+	}
+</style>
+
+<body>
+	<div id="app" v-cloak style="width: 100%;">
+		<el-tabs v-model="activeName" @tab-click="handleClick">
+		    <el-tab-pane label="工资考勤明细导入" name="first">
+					<div style="width: 99%;height:120px;border:1px solid;margin-bottom: 15px;margin-top: 15px;">
+						<span class="title" style="	width:50px;">查询条件</span>
+						<el-header >
+							<el-form :inline="true" :model="searchForm" ref="searchForm" >
+								<el-row >
+									<el-col :span="6" >
+											<el-form-item prop="empCodes">员工编码：<el-input v-model="searchForm.empCodes" size="mini"  placeholder="多个员工编码用空格隔开" style="width:70%;" /></el-form-item>
+									</el-col>
+
+									<el-col :span="6">
+											<el-form-item prop="empNames">员工姓名：<el-input v-model="searchForm.empNames" size="mini" placeholder="多个员工姓名用空格隔开" style="width:70%;" /></el-form-item>
+									</el-col>
+
+									<el-col :span="6">
+										<el-form-item prop="changedCode">操作人编码：<el-input v-model="searchForm.changedCode" size="mini"  style="width:50%;" /></el-form-item>
+									</el-col>
+
+									<el-col :span="6">
+										<el-form-item prop="changedName">操作人姓名：<el-input v-model="searchForm.changedName" size="mini"  style="width:50%;" /></el-form-item>
+									</el-col>
+
+								</el-row>
+								<el-row>
+									<el-col :span="7">
+											<el-form-item prop="operationDate">
+												操作时间：
+												<el-date-picker
+														size="mini"
+														style="width:70%;"
+														v-model="searchForm.operationDate"
+														value-format="yyyy-MM-dd"
+														type="daterange"
+														align="right"
+														unlink-panels
+														range-separator="至"
+														start-placeholder="开始日期"
+														end-placeholder="结束日期"
+														:picker-options="pickerOptions2">
+												</el-date-picker>
+											</el-form-item>
+									</el-col>
+
+
+									<el-col :span="5">
+										<el-form-item prop="payStartDate">
+											工资发放年月：
+											<el-date-picker
+													size="mini"
+													style="width:54.7%;"
+													v-model="searchForm.payStartDate"
+													type="month"
+													value-format="yyyyMM"
+													placeholder="开始年月">
+											</el-date-picker>-
+										</el-form-item>
+									</el-col>
+									<el-col :span="3">
+										<el-form-item prop="payEndDate">
+											<el-date-picker
+													size="mini"
+													style="width:100%;"
+													v-model="searchForm.payEndDate"
+													type="month"
+													value-format="yyyyMM"
+													placeholder="结束年月">
+											</el-date-picker>
+										</el-form-item>
+									</el-col>
+									<el-col :span="7">
+										<el-form-item>
+											<el-button type="primary" icon="el-icon-search" size="mini" @click="queryWagesList">查询</el-button>
+											<el-button type="danger" icon="el-icon-back" size="mini"  @click="resetForm('searchForm')">重置</el-button>
+										</el-form-item>
+									</el-col>
+								</el-row>
+
+							</el-form>
+						</el-header>
+					</div>
+
+				<div style="width: 99%;height:480px;border:1px solid;">
+						<div style="margin:5px 5px 5px 5px;" >
+
+							<el-button size="mini" type="primary"  slot="reference"  @click="dialogTableVisible  = true">批量导入</el-button>
+							<el-dialog  title="批量导入工资考勤明细" :visible.sync="dialogTableVisible" @open='openDialog' width="80%" style="height:95%;" >
+								<div style="width:95%;border:1px solid; margin-bottom: 15px;">
+									<span class="title" style="	width:62px;">操作人信息</span>
+									<!--<legend style="margin-left: 1%;color: #0000FF;">操作人信息</legend>-->
+									<el-header  style="width:100%" >
+										<el-form :inline="true" >
+											<el-row >
+												<el-col :span="8">
+													<el-form-item>操作人编码：<el-input v-model="operatorInfo.code" size="mini"  style="width:50%;" /></el-form-item>
+												</el-col>
+
+												<el-col :span="8">
+													<el-form-item>操作人姓名：<el-input v-model="operatorInfo.name" size="mini"  style="width:50%;" /></el-form-item>
+												</el-col>
+												<el-col :span="8">
+													<el-form-item>操作时间：<el-input v-model="operatorInfo.time" size="mini"  style="width:60%;" /></el-form-item>
+												</el-col>
+											</el-row>
+
+										</el-form>
+									</el-header>
+								</div>
+								<div id="importArea" v-loading="handling" element-loading-text="正在处理数据,请稍等...">
+								<!--<div id="importArea" >-->
+								<div style="width:95%;border:1px solid;">
+									<div  style="width:100%;" >
+										<span class="title" style="	width:76px;">工资考勤信息</span>
+										<div style="margin:1px 5px 35px 5px;;width:100%">
+											<div style="float:left;width: 30%;">
+												<form id="fileForm">
+												<input type="file" value=""  style="display:none;" id="file" @change='showFileName'>
+											 	</form >
+												<el-button @click="selectFile" size="mini" type="primary">选择文件</el-button>
+												<span >{{fileName}}</span>
+											</div>
+											<div style="float:left;width: 30%; text-align: center">
+											<el-button id="importButton" size="mini" type="success"  @click="submitImport" :loading="importing">导入</el-button>
+											</div>
+											<div style="float:left;width: 30%; text-align: right">
+											<el-button  size="mini" type="danger" @click="clearImport" >清空数据</el-button>
+											</div>
+										</div>
+										<div style="width:100%;">
+										<el-table :data="subImportData"  size="small" border height="250" style="width:100%;height:auto" >
+											<el-table-column type="index" fixed width="50" label="序号"></el-table-column>
+											<el-table-column prop="payDate" fixed label="年月" width="80"></el-table-column>
+											<el-table-column prop="empId" fixed label="员工编号" width="80"></el-table-column>
+											<el-table-column prop="empName" fixed label="姓名" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="baseWages" label="基本工资" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="floatWages" label="浮动部分" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="otherWages" label="其他" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="totalPayAmount" label="应发工资" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="socialSecurityFee" label="代缴社会保险费(个人)" width="90"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="accumulationFund" label="代缴公积金(个人)" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="personalIncomeTax" label="代扣个人所得税" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="waterCharge" label="代扣水费" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="electricCharge" label="代扣电费" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="otherTotalCharge" label="其他代扣代缴项目合计" width="90"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="monthlyArears" label="扣回往月欠款" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="thisMonthArears" label="本月产生欠款" width="80"></el-table-column>
+											<el-table-column :formatter="formatterMoney" prop="finalPayAmount" label="实发工资" width="80"></el-table-column>
+											<el-table-column prop="remarks" label="补发补扣说明" width="280"></el-table-column>
+										</el-table>
+										</div>
+
+									<div><el-pagination
+											@current-change="handleCurrentChange2"
+											:current-page="page2.currentPage"
+											:page-sizes="[1000]"
+											:page-size="page2.pageSize"
+											layout="total,sizes, prev, pager, next, jumper"
+											:total="page2.total">
+									</el-pagination>
+									</div>
+
+									</div>
+
+								</div>
+								<div style="margin:5px 5px 5px 5px;text-align: center" >
+									<el-button size="mini" type="primary" @click="uploadData" :loading="uploading">确定</el-button>
+									<el-button size="mini" type="danger" @click="dialogTableVisible  = false">取消</el-button>
+								</div>
+								</div>
+							</el-dialog>
+
+
+							<a href="addUsersTemplate.xlsx"><el-button size="mini" type="primary" >模板下载</el-button></a>
+							<el-button size="mini" type="primary" @click="exportExcel" >导出</el-button>
+						</div>
+						<div >
+						<el-table :data="tableData" size="small" height="400"  border style="width: 99%;">
+							<el-table-column type="index" fixed width="50" label="序号"></el-table-column>
+							<el-table-column prop="payDate" fixed label="年月" width="80"></el-table-column>
+							<el-table-column prop="empId" fixed label="员工编号" width="80"></el-table-column>
+							<el-table-column prop="empName" fixed label="姓名" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="baseWages" label="基本工资" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney"  prop="floatWages" label="浮动部分" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="otherWages" label="其他" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="totalPayAmount" label="应发工资" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="socialSecurityFee" label="代缴社会保险费(个人)" width="90"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="accumulationFund" label="代缴公积金(个人)" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="personalIncomeTax" label="代扣个人所得税" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="waterCharge" label="代扣水费" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="electricCharge" label="代扣电费" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="otherTotalCharge" label="其他代扣代缴项目合计" width="90"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="monthlyArears" label="扣回往月欠款" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="thisMonthArears" label="本月产生欠款" width="80"></el-table-column>
+							<el-table-column :formatter="formatterMoney" prop="finalPayAmount" label="实发工资" width="80"></el-table-column>
+							<el-table-column prop="remarks" label="补发补扣说明" width="280"></el-table-column>
+							<el-table-column prop="changedCode" label="操作人编码" width="80"></el-table-column>
+							<el-table-column prop="changedName" label="操作人姓名" width="80"></el-table-column>
+							<el-table-column prop="changedTime" label="操作时间" :formatter="dateFormat" width="160"></el-table-column>
+						</el-table>
+						</div>
+				</div>
+				<el-pagination
+						@size-change="handleSizeChange"
+						@current-change="handleCurrentChange"
+						:current-page="page.currentPage"
+						:page-sizes="[50,100,200,500]"
+						:page-size="page.pageSize"
+						layout="total, sizes, prev, pager, next, jumper"
+						:total="page.total">
+				</el-pagination>
+
+			</el-tab-pane>
+			<el-tab-pane label ="工资考勤说明维护" name = "second">
+				<h4>工资考勤明细查询说明：</h4>
+				<el-input type="textarea" :rows="10" :maxlength="1000" placeholder="请输入内容" v-model="wagesRemarks" ></el-input>
+				<div style="text-align:center;margin-top:30px;">
+					<el-button type="primary" style="width:120px;" v-on:click="saveWagesRemarks">保存</el-button>
+				</div>
+			</el-tab-pane>
+		</el-tabs>
+	</div>
+</body>
+
+<!-- 引入组件库 -->
+<script src="../../js/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="../../js/sheetjs.xlsx.core.min.js" type="text/javascript"></script>
+<script>
+	var vm = new Vue({
+		el: "#app",
+		data: {
+			searchForm:{empCodes:"",empNames:"",changedCode:"", changedName:"",operationDate:[],payStartDate:"",payEndDate:"",},
+            tableData:[],
+            activeName:'first',
+            pickerOptions2: {
+                shortcuts: [{
+                    text: '最近一周',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }, {
+                    text: '最近一个月',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }, {
+                    text: '最近三个月',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }]
+            },
+            pay_date:"",
+            dialogTableVisible:false,
+			page:{currentPage:1,total:0,pageSize:50},
+			page2:{currentPage:1,total:0,pageSize:1000},
+			operatorInfo:{code:"",name:"",time:""},
+            fileList:[],
+			importData:[],
+			subImportData:[],
+			importTotal:0,
+			importSuccessCount:0,
+			oldCount:0,
+            uploading:false,
+            importing:false,
+			fileName:"",
+			wagesRemarks:"",
+			handling:false
+		},
+		methods: {
+			queryWagesList(){
+                $.ajax({
+                    url:"../../wagesDetailOne/queryWagesList",
+                    type:'POST',
+                    data:{
+                        empCodes:this.searchForm.empCodes,
+                        empNames:this.searchForm.empNames,
+						 "hrWagesDetail.changedCode":this.searchForm.changedCode,
+						"hrWagesDetail.changedName":this.searchForm.changedName,
+                        operationStartDate:this.searchForm.operationDate[0],
+                        operationEndDate:this.searchForm.operationDate[1],
+                        payStartDate:this.searchForm.payStartDate,
+                        payEndDate:this.searchForm.payEndDate,
+                        pageIndex:this.page.currentPage,
+						pageSize :this.page.pageSize
+					},
+                    dataType:"json",
+                    success:function(result){
+                        if(result.status == 200){
+								vm.tableData = result.list;
+								vm.page.total = result.total;
+                        }else{
+
+                        }
+                    }
+                });
+			},
+            handleClick(tab, event) {
+                if (tab.name == 'second') {
+                    this.findWagesRemarks();
+				}
+            },
+            handleSizeChange(val) {
+                //console.log(`每页 ${val} 条`);
+				this.page.pageSize = val;
+                this.queryWagesList();
+            },
+            handleCurrentChange(val) {
+                // console.log(`当前页: ${val}`);
+				this.page.currentPage = val;
+                this.queryWagesList();
+            },
+            handleCurrentChange2(val) {
+                // console.log(`当前页: ${val}`);
+				this.page2.currentPage = val;
+                vm.subImportData = vm.importData.slice((val-1)*this.page2.pageSize,(val-1)*1000+this.page2.pageSize);
+            },
+            dateFormat(row, column, cellValue, index){
+               return this.getFormatDate(cellValue);
+            },
+            getFormatDate(dateStr) {
+                var date = new Date();
+			    if(!(typeof dateStr == 'undefined' || dateStr == null || dateStr == "")){
+                    date.setTime(parseInt(dateStr));
+                }
+                var y = date.getFullYear();
+                var m = date.getMonth() + 1;
+                m = m < 10 ? ('0' + m) : m;
+                var d = date.getDate();
+                d = d < 10 ? ('0' + d) : d;
+                var h = date.getHours();
+                h = h < 10 ? ('0' + h) : h;
+                var minute = date.getMinutes();
+                var second = date.getSeconds();
+                minute = minute < 10 ? ('0' + minute) : minute;
+                second = second < 10 ? ('0' + second) : second;
+                return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;
+
+            },
+            getCurrentTime() {
+                var date = new Date();
+                var y = date.getFullYear();
+                var m = date.getMonth() + 1;
+                m = m < 10 ? ('0' + m) : m;
+                var d = date.getDate();
+                d = d < 10 ? ('0' + d) : d;
+                var h = date.getHours();
+                h = h < 10 ? ('0' + h) : h;
+                var minute = date.getMinutes();
+                var second = date.getSeconds();
+                minute = minute < 10 ? ('0' + minute) : minute;
+                second = second < 10 ? ('0' + second) : second;
+                return y + '' + m + '' + d+''+h+''+minute+''+second;
+
+            },
+
+			openDialog(){
+                $.ajax({
+                    url:"../../wagesDetailOne/getCurrentUser",
+                    type:'POST',
+                    data:{},
+                    dataType:"json",
+                    success:function(result){
+                        if(result.responseCode == 0){
+                            vm.operatorInfo.code = result.user.account;
+                            vm.operatorInfo.name = result.user.realName;
+                            vm.operatorInfo.time = vm.getFormatDate();
+                        }else{
+
+                        }
+                    }
+                });
+			},
+            readWorkbook(workbook) {//这里写读取excel的业务方法
+
+                var sheetNames = workbook.SheetNames; // 工作表名称集合
+                var worksheet = workbook.Sheets[sheetNames[0]]; // 这里只读取第一张sheet
+                var data = XLSX.utils.sheet_to_json(worksheet,{raw:true, header:1});//加上{raw:true, header:1}可以读取空单元格,不然会自动忽略
+
+                if(!(data[0][0] == '年月' && data[0][6]=='应发工资')){
+                    vm.errorMessage("请按照模板格式导入数据");
+                    vm.importing = false;
+                    vm.handling = false;
+                    return;
+                }
+
+                vm.page2.total = data.length-1;
+                vm.importData = [];
+                vm.subImportData = [];
+
+				 for(var i = 1; i<data.length; i++){
+				     var flag = true;
+                     for(var j = 0; j<17; j++){
+                         var x = data[i][j]
+                         if(typeof x == 'undefined' || x == null || x == "" ){
+                           //  console.log("空单元格有"+j+i);
+							 if (j>=0 && j<=2){
+							     console.log("数据有误,缺少员工信息")
+							 }else if (j==16){//备注列空单元格转为""
+                                 data[i][j] = "";
+							 } else{//其他列均是金额,如果为空转为0
+                                 data[i][j] = 0;
+                             }
+						 }
+                     }
+                     var wagesDetail = vm.createWagesDetail(data[i][0],data[i][1],data[i][2],data[i][3],data[i][4],
+										 data[i][5],data[i][6],data[i][7],data[i][8],
+										 data[i][9],data[i][10],data[i][11],data[i][12],
+										 data[i][13],data[i][14],data[i][15],data[i][16]);
+
+                     if(!flag){
+                         vm.errorMessage("第"+i+"行数据格式不正确, 请清空数据后重新导入");
+                         break;
+					 }
+                      vm.importData.push(wagesDetail);
+				 }
+
+				 if (vm.importData.length > 1000){
+				     vm.subImportData = vm.importData.slice(0,1000);
+				 }else{
+                     vm.subImportData = vm.importData;
+				 }
+                vm.importing = false;
+                vm.handling = false;
+
+            },
+			checkHandlingData(){
+			    if(vm.uploading || vm.importing){
+			        return true;
+				}else {
+			        return false;
+				}
+			},
+            submitImport() {
+                var file = document.getElementById('file').files[0];
+                if(!file ){
+                    this.errorMessage("请选择导入文件")
+                    return;
+                }
+
+                if(vm.checkHandlingData()){
+                    vm.errorMessage("正在处理数据,请稍后操作...");
+                    return;
+                }
+
+                var reg = /^.*\.(?:xlsx)$/i;//文件名可以带空格
+                if (!reg.test(file.name)) {//校验不通过
+                    this.errorMessage("请选择excel(后缀为.xlsx)格式的文件!");
+                    return;
+                }
+
+                if(this.importData.length > 0){
+                    this.errorMessage("请清空数据再导入")
+                    return ;
+				}
+
+
+              	vm.importing = true;
+				vm.handling = true;
+                setTimeout(function(){ vm.readWorkbookFromLocalFile(file, function(workbook) {
+                    vm.readWorkbook(workbook);
+                }); }, 300);
+
+
+            },
+			createWagesDetail(payDate,empId,empName,baseWages,floatWages,otherWages,totalPayAmount,
+            socialSecurityFee,accumulationFund,personalIncomeTax,waterCharge,electricCharge,otherTotalCharge,
+            monthlyArears,thisMonthArears,finalPayAmount,remarks){
+                var obj = new Object();
+                obj.payDate = payDate;
+                obj.empId = empId;
+                obj.empName = empName;
+                obj.baseWages = baseWages;
+                obj.floatWages = floatWages;
+                obj.otherWages = otherWages;
+                obj.totalPayAmount = totalPayAmount;
+                obj.socialSecurityFee = socialSecurityFee;
+                obj.accumulationFund = accumulationFund;
+                obj.personalIncomeTax = personalIncomeTax;
+                obj.waterCharge = waterCharge;
+                obj.electricCharge = electricCharge;
+                obj.otherTotalCharge = otherTotalCharge;
+                obj.monthlyArears = monthlyArears;
+                obj.thisMonthArears = thisMonthArears;
+                obj.thisMonthArears = thisMonthArears;
+                obj.finalPayAmount = finalPayAmount;
+                obj.remarks = remarks;
+
+                return obj;
+			},
+
+            readWorkbookFromLocalFile(file, callback) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var data = e.target.result;
+                    var workbook = XLSX.read(data, {type: 'binary'});
+                    if(callback) callback(workbook);//回调方法获取workbook
+                };
+                reader.readAsBinaryString(file);
+            },
+			selectFile(){
+                document.getElementById('file').click();
+			},
+			showFileName(){
+                var file = document.getElementById('file').files[0];
+                if(file){
+                    this.fileName = file.name;
+                }
+			},
+			clearImport(){
+			    this.importData = [];
+			    this.subImportData = [];
+			    this.page2.total = 0;
+			    this.page2.currentPage  = 1;
+			    this.fileName = "";
+			    $("#fileForm")[0].reset();
+        },
+			uploadData(){
+			    if(this.importData.length<1){
+			        vm.errorMessage("请导入数据再确认")
+			        return;
+				}
+
+                if(vm.checkHandlingData()){
+                    vm.errorMessage("正在处理数据,请稍后操作...");
+                    return;
+                }
+
+                vm.handling = true;
+                var json = JSON.stringify({'importList':this.importData,'changedCode':this.operatorInfo.code,
+                    'changedName':this.operatorInfo.name});
+                setTimeout(function(){
+                    $.ajax({
+                        url:"../../wagesDetailOne/importData",
+                        type:'POST',
+                        data:json,
+                        dataType:"json",
+                        async:true,
+                        contentType:"application/json",
+                        beforeSend:function() {
+                            vm.uploading = true;
+                        },
+                        complete: function () {
+                            vm.uploading = false;
+                            vm.handling = false;
+                        },
+                        success:function(result){
+                            if(result.status == 200){
+                                vm.importSuccessCount = result.addCount;
+                                vm.oldCount = result.oldCount;
+                                vm.dialogTableVisible = false;
+                                vm.queryWagesList();
+                                var msg = '新增'+vm.importSuccessCount+'条, 已有'+vm.oldCount+'条';
+                                vm.successMessage(msg);
+
+                            }else{
+                                vm.errorMessage(result.msg);
+                            }
+                            vm.uploading = false;
+                        }
+                    });
+				}, 300);
+
+               /* var json = JSON.stringify({'importList':this.importData,'changedCode':this.operatorInfo.code,
+					'changedName':this.operatorInfo.name});
+                $.ajax({
+                    url:"../../wagesDetailOne/importData",
+                    type:'POST',
+                    data:json,
+                    dataType:"json",
+                    async:true,
+                    contentType:"application/json",
+                    beforeSend:function() {
+                        vm.uploading = true;
+                    },
+                    complete: function () {
+                        vm.uploading = false;
+                    },
+					success:function(result){
+						if(result.status == 200){
+							vm.importSuccessCount = result.addCount;
+							vm.oldCount = result.oldCount;
+							vm.dialogTableVisible = false;
+							vm.queryWagesList();
+							var msg = '新增'+vm.importSuccessCount+'条, 已有'+vm.oldCount+'条';
+							vm.successMessage(msg);
+
+						}else{
+							vm.errorMessage(result.msg);
+						}
+							vm.uploading = false;
+                    }
+                });*/
+
+                //this.uploading = false;
+			},
+			successMessage(msg){
+                this.$message({
+                    showClose: true,
+                    message: msg,
+                    duration:3000,
+                    type: 'success'
+                });
+			},
+			errorMessage(msg){
+                this.$message({
+                    showClose: true,
+                    message: msg,
+                    duration:3000,
+                    type: 'error'
+                });
+			},
+			exportExcel() {
+			    var flag = true;
+			    if( this.searchForm.empCodes == ""
+				    && this.searchForm.empNames == ""
+				    && this.searchForm.changedCode == ""
+				    && this.searchForm.changedName == ""
+				    && this.searchForm.operationDate.length < 1
+				    && this.searchForm.payStartDate == ""
+				    && this.searchForm.payEndDate == ""
+				){
+			        this.errorMessage("只可导出查询后的数据")
+			        return;
+				}
+
+                $.ajax({
+                    url: "../../wagesDetailOne/exportExcel",
+                    type: 'POST',
+                    data: {
+                        empCodes:this.searchForm.empCodes,
+                        empNames:this.searchForm.empNames,
+                        "hrWagesDetail.changedCode":this.searchForm.changedCode,
+                        "hrWagesDetail.changedName":this.searchForm.changedName,
+                        operationStartDate:this.searchForm.operationDate[0],
+                        operationEndDate:this.searchForm.operationDate[1],
+                        payStartDate:this.searchForm.payStartDate,
+                        payEndDate:this.searchForm.payEndDate,
+                        pageIndex:this.page.currentPage,
+                        pageSize :this.page.pageSize
+                    },
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.status == 200) {
+                            var filePath = result.dfsPath;
+                            if (filePath) {
+                                var fileName = "工资考勤明细（一线)_" + vm.getCurrentTime() + ".xlsx";
+                                window.open(filePath + "?name=" + fileName);
+                            } else {
+                                vm.errorMessage("导出失败...")
+                            }
+                        } else {
+                            vm.errorMessage("导出失败....")
+                        }
+                    }
+                })
+            },
+			saveWagesRemarks(){
+			    var wagesRemarks = this.wagesRemarks;
+			    if (wagesRemarks.trim() == ""){
+			        vm.errorMessage("亲,请输入内容再保存...");
+			        return;
+				}
+                $.ajax({
+                    url:"../../wagesDetailOne/saveWagesRemarks",
+                    type:'POST',
+                    data:{wagesRemarks:wagesRemarks},
+                    dataType:"json",
+                    success:function(result){
+                        if(result.status == 200){
+                            vm.successMessage("保存成功!");
+                        }else{
+							vm.errorMessage("保存失败.....")
+                        }
+                    }
+                });
+			},
+			findWagesRemarks(){
+                $.ajax({
+                    url:"../../wagesDetailOne/findWagesRemarks",
+                    type:'POST',
+                    data:{},
+                    dataType:"json",
+                    success:function(result){
+                        if(result.status == 200){
+                            var wagesRemarks = result.wagesRemarks;
+                            if (!(typeof wagesRemarks == 'undefined' || wagesRemarks == null || wagesRemarks == "") ){
+                                vm.wagesRemarks = result.wagesRemarks;
+							}
+                        }
+                    }
+                });
+			},
+            resetForm(formName) {
+                this.$refs[formName].resetFields();
+                this.page.currentPage = 1;
+            },
+            formatterMoney(row, column,cellValue, index) {
+                var numStr = cellValue.toFixed(2)+"";
+                if(numStr.endsWith(".00")){
+                    return parseInt(numStr)
+				}
+                return numStr;
+            }
+		},
+		mounted:function () {
+            this.queryWagesList();
+        }
+	});
+</script>
+</html>.
