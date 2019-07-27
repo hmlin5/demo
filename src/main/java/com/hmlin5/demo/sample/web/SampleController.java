@@ -45,4 +45,13 @@ public class SampleController {
         return pageInfo;
     }
 
+    @RequestMapping("testChangeProperties")
+    public String testChangeProperties(){
+        String str = "";
+        str = PropertiesUtil.getProperty("test.properties", "b");
+        return str;
+
+    }
+
+
 }
