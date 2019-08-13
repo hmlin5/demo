@@ -1,6 +1,7 @@
 package com.hmlin5.demo.wx;
 
 import com.hmlin5.demo.wx.vo.WxResponse;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,13 +25,14 @@ public class WxController {
   
 
     @RequestMapping("/wx/login")
-    public Map<String, String> miniProgramWxLogin(){
+    public Map<String, String> miniProgramWxLogin(String code){
         String ticket= UUID.randomUUID().toString().replace("-", "");
 
         //https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
-        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+appSecret+"&js_code=JSCODE&grant_type=authorization_code";
+        String url = "https://api.weixin.qq.com/sns/jscode2session?appid="+appId+"&secret="+appSecret+"&js_code="+code+"&grant_type=authorization_code";
         WxResponse wxResponse = restTemplate.getForObject(url, WxResponse.class);
-
+        JSONObject jsonObject = JSONObject.fromObject(wxResponse);
+        System.out.println("==========="+jsonObject.toString());
 
 
         Map<String, String> map = new HashMap<>(1);

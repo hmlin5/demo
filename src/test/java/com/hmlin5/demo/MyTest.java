@@ -236,6 +236,18 @@ public class MyTest {
     }
 
 
+    @Test
+    public void testMapGetNull(){
+
+        HashMap<String, Integer> map = new HashMap<>();
+        map.put("key1",5);
+        Integer integer = map.get("");
+        System.out.println("================"+integer);
+
+
+    }
+
+
 
 
 }
