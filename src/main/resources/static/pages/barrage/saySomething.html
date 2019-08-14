@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>barrage</title>
+
+    <script src="../../js/jquery-1.9.1.min.js"></script>
 <style>
     *{
         padding: 0;
@@ -109,7 +111,7 @@
 
 
 </style>
-    <script src="../../jquery-1.9.1.min.js"></script>
+
 </head>
 <body>
 <div class="screen">
@@ -137,7 +139,7 @@
 <script>
     (function () {
         //获取所有需要的节点
-        let sShowList = document.querySelectorAll('.s_show div'),
+        var sShowList = document.querySelectorAll('.s_show div'),
             oSend = document.querySelector('.send'),
             oShow = document.querySelector('.s_show'),
             oText = document.querySelector('.text'),
@@ -148,7 +150,7 @@
 
         oBtn.onclick = function () {
             if (new Date() - oTime > 3000 && oText.value) {//点击间隔大于3秒
-                let Div = document.createElement('div');
+                var Div = document.createElement('div');
                 Div.innerHTML = oText.value;
                 oShow.appendChild(Div);//添加弹幕节点
                 init(Div);//初始化弹幕效果
@@ -195,11 +197,12 @@
     function getBarrageDB() {
         $.ajax({
             type:"post",
-            url:"http://47.106.194.61:8080/barrage/findBarrage",
+            url:"http://localhost:8080/barrage/findBarrage",
             dataType:"json",
             success:function(data){
-                for (i = 0; i < data.length; i++) {
-                    barrage = data[i]
+                oShow = document.querySelector('.s_show');
+                for (var i = 0; i < data.list.length; i++) {
+                    var barrage = data.list[i];
                     var Div = document.createElement('div');
                     Div.innerHTML = barrage.msg;
                     oShow.appendChild(Div);//添加弹幕节点

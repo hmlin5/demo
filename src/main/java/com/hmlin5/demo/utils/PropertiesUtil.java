@@ -1,4 +1,4 @@
-package com.hmlin5.demo.sample.web;
+package com.hmlin5.demo.utils;
 
 import java.io.*;
 import java.net.URISyntaxException;

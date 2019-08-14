@@ -1,17 +1,10 @@
 package com.hmlin5.demo.sample.web;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.hmlin5.demo.sample.model.SfaProductIntegralConfig;
-import com.hmlin5.demo.sample.service.api.SfaProductIntegralService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import com.hmlin5.demo.utils.PropertiesUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @ Author ：linhaomiao.
@@ -22,8 +15,6 @@ import java.util.List;
 @RequestMapping("/sample")
 public class SampleController {
 
-    @Autowired
-    private SfaProductIntegralService sfaProductIntegralService;
 
     @RequestMapping("/")
     public String home(){
@@ -35,14 +26,6 @@ public class SampleController {
     public Date currentDate(){
 
         return new Date();
-    }
-
-    @RequestMapping("findList")
-    public PageInfo<SfaProductIntegralConfig> findList(){
-        PageHelper.startPage(2,2);
-        List<SfaProductIntegralConfig> list = sfaProductIntegralService.findList(new SfaProductIntegralConfig());
-        PageInfo<SfaProductIntegralConfig> pageInfo = new PageInfo<>(list);
-        return pageInfo;
     }
 
     @RequestMapping("testChangeProperties")

@@ -1,7 +1,6 @@
 package com.hmlin5.demo.config;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.github.pagehelper.PageHelper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 import javax.sql.DataSource;
-import java.util.Properties;
 
 /**
  * @ Author ：linhaomiao
@@ -19,7 +17,7 @@ import java.util.Properties;
  */
 @SpringBootConfiguration
 @ComponentScan(value="com.hmlin5.demo")
-@MapperScan(basePackages= {"com.hmlin5.demo.*.dao"})
+@MapperScan(basePackages= {"com.hmlin5.demo.*.mapper"})
 public class AppContextConfig {
 
     @Bean(name = "dataSource")

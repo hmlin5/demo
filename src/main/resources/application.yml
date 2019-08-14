@@ -14,10 +14,10 @@ server:
 #        type: com.alibaba.druid.pool.DruidDataSource
 
 druid:
-    url: jdbc:mysql://47.106.194.61:3306/demo?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
+    url: jdbc:mysql://47.106.194.61:3306/demo?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8&useSSL=false
     username: root
     password: Hmlin5#
-    driverClassName: com.mysql.jdbc.Driver
+    driverClassName: com.mysql.cj.jdbc.Driver
 
 #bonecp:
 #    jdbcUrl: jdbc:mysql://localhost:3306/db_demo_project?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
@@ -26,10 +26,16 @@ druid:
 #    driverClass: com.mysql.cj.jdbc.Driver
 
 #加载Mybatis核心配置文件
-mybatis:
-    mapper-locations: classpath:mapper/*/*.xml
+#mybatis:
+#    mapper-locations: classpath*:mapper/**/*.xml
+ #   mybatis.mapper-locations: classpath*:mapper/**/*.xml
 #    scanBasePackage: com.hmlin5.demo
-#    type-aliases-package:   # 注意：对应实体类的路径
+#   type-aliases-package: com.hmlin5.demo.*.entity   # 注意：对应实体类的路径
+
+mybatis-plus:
+    # 如果是放在src/main/java目录下 classpath:/com/yourpackage/*/mapper/*Mapper.xml
+    # 如果是放在resource目录 classpath:/mapper/*Mapper.xml
+    mapper-locations: classpath*:mapper/**/*.xml
 
 pagehelper:
     helperDialect: mysql
