@@ -9,8 +9,10 @@ import com.hmlin5.demo.barrage.service.IDemoBarrageService;
 import com.hmlin5.demo.utils.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -32,6 +34,7 @@ import java.util.Random;
  */
 @RestController
 @RequestMapping("/barrage")
+@CrossOrigin
 public class DemoBarrageController {
 
     @Autowired
@@ -52,7 +55,7 @@ public class DemoBarrageController {
             //new page(current,size) current当前页, size 页码大小
           //  bw.eq(DemoBarrage.ID,9);
          //   bw.ge(DemoBarrage.ID,9);
-            IPage<DemoBarrage> page = iDemoBarrageService.page(new Page<>(1,3), bw);
+            IPage<DemoBarrage> page = iDemoBarrageService.page(new Page<>(1,10), bw);
             List<DemoBarrage> list = page.getRecords();
 
             map.put("list",list);
@@ -69,8 +72,9 @@ public class DemoBarrageController {
 
 
 
+
     @RequestMapping("addBarrage")
-    public Map<String, Object> addBarrage( String msg){
+    public Map<String, Object> addBarrage(@RequestParam("msg")String msg){
         Map<String, Object> map = new HashMap<>(1);
         map.put("msg","新增失败");
         map.put("code","1");
@@ -79,7 +83,7 @@ public class DemoBarrageController {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             String ipAddr = getIpAddr(request);
 
-            msg = FileUtils.getContentByRandomLine();
+         //   msg = FileUtils.getContentByRandomLine();
             if (!StringUtils.isEmpty(msg)){
                 DemoBarrage record = new DemoBarrage();
                 record.setCreateTime(LocalDateTime.now());

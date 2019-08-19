@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>barrage</title>
+    <!--<embed src="/resource/bg_music.mp3" hidden="true" loop="true" />-->
 
     <script src="../../js/jquery-1.9.1.min.js"></script>
 <style>
@@ -18,7 +19,9 @@
         overflow: hidden;
         position: relative;
         height: 100%;
-        background-color: rgba(249, 249, 249, 0.78);
+        /*background-color: rgba(249, 249, 249, 0.78);*/
+        background: url(/resource/tellme.jpg);
+
     }
     .top{
         position: absolute;
@@ -93,7 +96,10 @@
     }
     .s_show div{
         position: absolute;
-        font-size: 40px;
+        word-break:keep-all; /* 不换行 */
+        white-space:nowrap; /* 不换行 */
+        overflow:hidden; /* 内容超出宽度时隐藏超出部分的内容 */
+        font-size: 30px;
         font-weight: bold;
         color: rgba(3, 5, 2, 0.5);
     }
@@ -110,6 +116,7 @@
     }
 
 
+
 </style>
 
 </head>
@@ -120,87 +127,65 @@
     </div>
     <div class="send">
         <div class="input">
-            <input type="text" class="text" placeholder="    Say   Something   ...">
+            <input type="text" class="text" placeholder="    Say   Something   ..." onfocus="this.placeholder=''" onblur="this.placeholder='    Say   Something   ...'">
             <div class="btn" id="btn">
             </div>
-            <div class="say">SEND</div>
+            <div class="say">发送</div>
         </div>
     </div>
-    <div class="s_show">
-        <div>让开！挡到我用无限屏了</div>
-        <div>7777777777777777777777777</div>
-        <div>求求你，不要秀了</div>
-        <div>这也太真实了吧</div>
-    </div>
+        <div class="s_show" id="show">
+        </div>
 </div>
 
 </body>
 
 <script>
-    (function () {
-        //获取所有需要的节点
-        var sShowList = document.querySelectorAll('.s_show div'),
-            oSend = document.querySelector('.send'),
-            oShow = document.querySelector('.s_show'),
-            oText = document.querySelector('.text'),
-            otop = document.querySelector('.top'),
-            oBtn = document.querySelector('.btn'),
-            oTime = 0,//初始化点击时间，用来限制点击频率
-            waitTime = 3;
 
-        oBtn.onclick = function () {
-            if (new Date() - oTime > 3000 && oText.value) {//点击间隔大于3秒
-                var Div = document.createElement('div');
-                Div.innerHTML = oText.value;
-                oShow.appendChild(Div);//添加弹幕节点
-                init(Div);//初始化弹幕效果
-                oTime = new Date();
-            }
-        };
-
-      getBarrageDB();
-
-        for (i = 0; i < sShowList.length; i++) {//遍历所有已有弹幕节点，初始化
-            init(sShowList[i])
-        }
+    //获取所有需要的节点
+    var sShowList = document.querySelectorAll('.s_show div'),
+        oSend = document.querySelector('.send'),
+        oShow = document.querySelector('.s_show'),
+        oText = document.querySelector('.text'),
+        otop = document.querySelector('.top'),
+        oBtn = document.querySelector('.btn'),
+        oTime = 0,//初始化点击时间，用来限制点击频率
+        waitTime = 3;
 
 
-        function init(obj) {
-            var screenHeight = document.documentElement.clientHeight,
-                screenWidth = document.documentElement.clientWidth,//屏幕宽高
-                sendHeight = oSend.clientHeight,//输入界面高度
-                topHeight = otop.clientHeight,//标题栏高度
-                height = screenHeight - sendHeight - obj.clientHeight - topHeight,//弹幕显示区域高度
-                width = screenWidth - obj.clientWidth;
+    function init(obj) {
+        var screenHeight = document.documentElement.clientHeight,
+            screenWidth = document.documentElement.clientWidth,//屏幕宽高
+            sendHeight = oSend.clientHeight,//输入界面高度
+            topHeight = otop.clientHeight,//标题栏高度
+            height = screenHeight - sendHeight - obj.clientHeight - topHeight,//弹幕显示区域高度
+           // width = screenWidth - obj.clientWidth;
+           width = screenWidth;
 
-            obj.style.top = Math.random() * height + topHeight + 'px';//+topHeight 是为了让弹幕不被标题栏遮住
+        obj.style.top = Math.random() * height + topHeight + 'px';//+topHeight 是为了让弹幕不被标题栏遮住
+        obj.style.left = width + 'px';
+        var randomMoveVelocity = getRandomNum();//随机字幕移动速度
+        move(obj, width,randomMoveVelocity);
+    }
+
+
+    //动画效果
+    function move(obj, width, randomMoveVelocity) {
+        if (width > -obj.clientWidth) {
+            width -= randomMoveVelocity;
             obj.style.left = width + 'px';
-            move(obj, width);
+            requestAnimationFrame(function () {
+                move(obj, width,randomMoveVelocity);
+            });//生成动画，2px移动
+        } else {
+            oShow.removeChild(obj);//如果弹幕显示宽度小于0—obj.width ,移除该节点。
         }
-        //动画效果
-        function move(obj, width) {
-            if (width > -obj.clientWidth) {
-                width -= 2;
-                obj.style.left = width + 'px';
-                requestAnimationFrame(function () {
-                    move(obj, width);
-                });//生成动画，2px移动
-            } else {
-                oShow.removeChild(obj);//如果弹幕显示宽度小于0—obj.width ,移除该节点。
-            }
-        }
-
-
-
-    })();
-
+    }
     function getBarrageDB() {
         $.ajax({
             type:"post",
-            url:"http://localhost:8080/barrage/findBarrage",
+            url:"http://47.106.194.61:8080/barrage/findBarrage",
             dataType:"json",
             success:function(data){
-                oShow = document.querySelector('.s_show');
                 for (var i = 0; i < data.list.length; i++) {
                     var barrage = data.list[i];
                     var Div = document.createElement('div');
@@ -210,11 +195,99 @@
                 }
             },
             error:function(jqXHR){
-                alert("发生错误："+ jqXHR.status);
+                console.log("发生错误："+ jqXHR.status);
             }
         });
 
     }
+
+    function getRandomNum(){
+        var num = Math.random()*1.0+1.0;
+        return num;
+    }
+
+    function circle(){
+        var show = document.getElementById('show');
+        var divShow = show.getElementsByTagName("div")
+
+        if (divShow.length == 0){
+            getBarrageDB();
+        }
+
+    }
+
+
+    function addBarrage(msg) {
+        $.ajax({
+            type:"post",
+            url:"http://47.106.194.61:8080/barrage/addBarrage",
+            dataType:"json",
+            data:{'msg':msg},
+            success:function(data){
+                console.log(data);
+            },
+            error:function(jqXHR){
+                console.log("发生错误："+ jqXHR.status);
+            }
+        });
+    }
+
+    (function () {
+        oBtn.onclick = function () {
+            if (new Date() - oTime > 3000 && oText.value) {//点击间隔大于3秒
+                var Div = document.createElement('div');
+                Div.innerHTML = oText.value;
+                oShow.appendChild(Div);//添加弹幕节点
+                init(Div);//初始化弹幕效果
+                oTime = new Date();
+
+                if (oText.value) {
+                    addBarrage(oText.value);
+                }
+
+
+            }
+        };
+        getBarrageDB();
+
+        for (var i = 0; i < sShowList.length; i++) {//遍历所有已有弹幕节点，初始化
+            init(sShowList[i])
+        }
+        window.setInterval("circle()",1000);
+
+    })();
+
+
+
+    var a_idx = 0;
+    $(document).ready(function ($) {
+        $("body").click(function (e) {
+            var red = parseInt(Math.random()*257).toString(16);
+            var blue = parseInt(Math.random()*257).toString(16);
+            var green= parseInt(Math.random()*257).toString(16);
+            var color = '#'+red+blue+green;
+            var a = new Array("❤ 么么哒 ❤", "❤ 皮一下 ❤", "❤ 万物皆可盘 ❤", " ❤ 行车不规范，亲人两行泪 ❤", "❤ 我信你个鬼哦，你个糟老头子坏得很！❤", " ❤ 一如既往的稳。。。 ❤", "❤ 你是魔鬼还是秀儿？ ❤", "❤ 确认过眼神 ❤", "❤ 404错误 ❤", "❤ 吃瓜群众 ❤", "❤ 积极废人 ❤", "❤ 我都连续加班一年了, 是时候跟老板提涨工资了! ❤");
+            var $i = $("<span/>").text(a[a_idx]);
+            a_idx = (a_idx + 1) % a.length;
+            var x = e.pageX,
+                y = e.pageY;
+            $i.css({
+                "z-index": 999,
+                "top": y - 20,
+                "left": x,
+                "position": "absolute",
+                "font-weight": "bold",
+                "color": color
+            });
+            $("body").append($i);
+            $i.animate({
+                "top": y - 180,
+                "opacity": 0
+            }, 1500, function () {
+                $i.remove();
+            });
+        });
+    });
 
 
 </script>
